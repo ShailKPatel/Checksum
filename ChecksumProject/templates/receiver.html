@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Receiver{% endblock %}
+
+{% block content %}
+
+<!-- Title Block -->
+<div class="mario-header" style="margin-bottom: 30px;">
+    <h1>Checksum Receiver</h1>
+</div>
+
+{% if not packet %}
+<div class="card" style="text-align: center; border-top: 10px solid var(--luigi-green);">
+    <h2>Waiting for Packets...</h2>
+    <p>Check the wire to see if any packets have arrived.</p>
+    <a href="/receiver" class="btn btn-success">CHECK / REFRESH WIRE</a>
+</div>
+
+{% else %}
+
+<!-- Received Packet Info -->
+<div class="card" style="border-top: 10px solid var(--luigi-green);">
+    <h2>Packet Received</h2>
+
+    <div class="row">
+        <div class="col">
+            <strong>DATA RECEIVED:</strong>
+            <div style="font-family: monospace; font-size: 1.2em; background: #eee; padding: 5px;">{{ packet.data }}
+            </div>
+        </div>
+        <div class="col">
+            <strong>CHECKSUM RECEIVED:</strong>
+            <div style="font-family: monospace; font-size: 1.2em; background: #eee; padding: 5px;">{{
+                packet.sent_checksum_hex }}</div>
+        </div>
+    </div>
+
+    <div style="margin-top: 20px; text-align: right;">
+        <form action="/reset" method="post" style="display:inline;">
+            <button type="submit" class="btn btn-secondary">CLEAR WIRE</button>
+        </form>
+        <a href="/receiver" class="btn btn-success">REFRESH</a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Verification Steps -->
+    <div class="col" style="flex: 2;">
+        <div class="card">
+            <h3>Checksum Verification Log</h3>
+
+            {% for step_obj in verification_log %}
+            <div class="step-container" style="margin-bottom: 20px; border-left: 5px solid #ccc; padding-left: 15px;">
+                <h4 style="margin-top: 0; color: #555;">{{ step_obj.title }}</h4>
+                <div class="steps-log" style="max-height: 200px;">
+                    {% for line in step_obj.content %}
+                    <div class="log-line">{{ line }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% if not loop.last %}
+            <hr style="border: 0; border-top: 1px dashed #aaa; margin: 20px 0;">
+            {% endif %}
+            {% endfor %}
+
+            <div style="margin-top: 10px; border-top: 2px solid #ccc; padding-top: 10px;">
+                <strong>Final Sum (Data + Checksum):</strong>
+                <span style="font-family: monospace; font-size: 1.2em;">0x{{ final_sum_hex }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 5: Explanation Panel -->
+    <div class="col" style="flex: 1;">
+        <div class="card {% if is_valid %}card-valid{% else %}card-invalid{% endif %}"
+            style="height: 100%; box-sizing: border-box;">
+            <h3>Step 5: Explanation Panel</h3>
+
+            {% if is_valid %}
+            <div class="status-badge status-success"
+                style="width: 100%; box-sizing: border-box; text-align: center; font-size: 1.5em; margin-bottom: 20px;">
+                VALID
+            </div>
+            <p><strong>Expected Checksum:</strong> All 1s (0xFFFF)</p>
+            <p><strong>Actual Result:</strong> 0x{{ final_sum_hex }}</p>
+            <hr>
+            <p><strong>Verification result:</strong> Success. The checksum matches the data, indicating no errors
+                occurred.</p>
+
+            {% else %}
+            <div class="status-badge status-error"
+                style="width: 100%; box-sizing: border-box; text-align: center; font-size: 1.5em; margin-bottom: 20px;">
+                INVALID
+            </div>
+            <p><strong>Expected Checksum:</strong> 0xFFFF</p>
+            <p><strong>Actual Result:</strong> 0x{{ final_sum_hex }}</p>
+            <hr>
+            <p><strong>Verification result:</strong> Failed.</p>
+            <p>This means either the <strong>Received Data</strong> or the <strong>Checksum</strong> was altered during
+                transmission.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endif %}
+
+{% endblock %}

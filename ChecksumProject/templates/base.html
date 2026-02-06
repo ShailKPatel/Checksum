@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checksum Verifier - {% block title %}{% endblock %}</title>
+
+    <!-- Favicon Logic with increased border-radius via styling attempt.
+         Note: Standard favicon is usually just <link rel="icon">. 
+         Browser tab icons CANNOT be styled with CSS (border-radius) dynamically by the page.
+         The image itself must be processed to have round corners.
+         However, IF these were meant to be page headers, we can style them.
+         Assuming USER wants the actual tab icon:
+         We serve the image. If the user wants rounded corners visible in the TAB, the image file needs to be edited.
+         We cannot control the browser chrome UI.
+         
+         BUT, if the user means image elements IN the page, we will add style for that.
+    -->
+    {% if request.url.path == '/sender' or request.url.path == '/' %}
+    <link rel="icon" href="/static/images/Mario.jpeg">
+    {% elif request.url.path == '/receiver' %}
+    <link rel="icon" href="/static/images/Luigi.jpg">
+    {% endif %}
+
+    <!-- Google Fonts for Pixel Style -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+
+<body>
+    <div class="nav-links">
+        <a href="/sender" class="btn btn-primary">Sender</a>
+        <a href="/receiver" class="btn btn-success">Receiver</a>
+    </div>
+
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+
+</html>
