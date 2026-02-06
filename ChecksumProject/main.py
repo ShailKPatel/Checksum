@@ -37,55 +37,60 @@ async def sender_page(request: Request):
         "step": "input"
     })
 
-@app.post("/calculate", response_class=HTMLResponse)
-async def calculate_step(request: Request, data: str = Form(...)):
-    """
-    Step 1-4: Checksum Generation
-    Takes input, calculates checksum steps in structured format.
-    """
-    # New return format: (checksum, list_of_step_objects)
-    # Each step object: {"title": "Step X", "lines": ["line 1", "line 2"]}
-    checksum_val, structured_steps = calculate_checksum(data) 
-    checksum_hex = f"{checksum_val:04X}"
-    
-    return templates.TemplateResponse("sender.html", {
-        "request": request,
-        "step": "preview",
-        "data": data,
-        "checksum_val": checksum_val,
-        "checksum_hex": checksum_hex,
-        "steps_log": structured_steps
-    })
-
-@app.post("/send", response_class=HTMLResponse)
-async def send_to_wire(
-    request: Request, 
-    final_data: str = Form(""), 
-    final_checksum_hex: str = Form("")
+@app.post("/sender", response_class=HTMLResponse)
+async def sender_actions(
+    request: Request,
+    data: Optional[str] = Form(None),
+    final_data: Optional[str] = Form(None),
+    final_checksum_hex: Optional[str] = Form(None),
+    action: str = Form(...) # 'calculate' or 'send'
 ):
     """
-    Step 5: Send
-    Takes the (potentially edited) data and checksum from the Preview panel.
+    Unified Handler for Sender Actions to keep URL at /sender
     """
     global current_packet
-    
-    try:
-        sent_checksum_val = int(final_checksum_hex, 16)
-    except ValueError:
-        sent_checksum_val = 0
+
+    # 1. GENERATE CHECKSUM
+    if action == 'calculate':
+        payload = data if data else ""
+        checksum_val, structured_steps = calculate_checksum(payload) 
+        checksum_hex = f"{checksum_val:04X}"
         
-    current_packet = Packet(
-        data=final_data,
-        sent_checksum_val=sent_checksum_val,
-        sent_checksum_hex=final_checksum_hex,
-        is_active=True
-    )
+        return templates.TemplateResponse("sender.html", {
+            "request": request,
+            "step": "preview",
+            "data": payload,
+            "checksum_val": checksum_val,
+            "checksum_hex": checksum_hex,
+            "steps_log": structured_steps
+        })
+
+    # 2. SEND TO WIRE
+    elif action == 'send':
+        payload = final_data if final_data else ""
+        chk_hex = final_checksum_hex if final_checksum_hex else ""
+        
+        try:
+            sent_checksum_val = int(chk_hex, 16)
+        except ValueError:
+            sent_checksum_val = 0
+            
+        current_packet = Packet(
+            data=payload,
+            sent_checksum_val=sent_checksum_val,
+            sent_checksum_hex=chk_hex,
+            is_active=True
+        )
+        
+        return templates.TemplateResponse("sender.html", {
+            "request": request,
+            "step": "sent",
+            "packet": current_packet,
+            "data": "" 
+        })
     
-    return templates.TemplateResponse("sender.html", {
-        "request": request,
-        "step": "sent",
-        "packet": current_packet
-    })
+    return RedirectResponse(url="/sender", status_code=303)
+
 
 @app.get("/receiver", response_class=HTMLResponse)
 async def receiver_page(request: Request):
@@ -112,11 +117,25 @@ async def receiver_page(request: Request):
         
     return templates.TemplateResponse("receiver.html", context)
 
-@app.post("/reset")
-async def reset():
+
+@app.post("/receiver", response_class=HTMLResponse)
+async def receiver_actions(request: Request, action: str = Form(...)):
+    """
+    Unified Handler for Receiver Actions to keep URL at /receiver
+    """
     global current_packet
-    current_packet = None
-    return RedirectResponse(url="/sender")
+    
+    if action == 'clear':
+        current_packet = None
+        return templates.TemplateResponse("receiver.html", {
+            "request": request,
+            "packet": None,
+            "verification_log": [],
+            "is_valid": False,
+            "final_sum_hex": ""
+        })
+        
+    return RedirectResponse(url="/receiver", status_code=303)
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)

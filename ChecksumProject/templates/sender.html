@@ -2,6 +2,10 @@
 
 {% block title %}Sender{% endblock %}
 
+{% block favicon %}
+<link rel="icon" href="/static/images/Mario.png" type="image/png">
+{% endblock %}
+
 {% block content %}
 
 <!-- Title Block -->
@@ -12,29 +16,27 @@
 <!-- STEP 0: Input Form (Always Visible) -->
 <div class="card" style="border-top: 10px solid var(--mario-red);">
     <h2>New Message</h2>
-    <form action="/calculate" method="post">
+    <form action="/sender" method="post">
         <div style="margin-bottom: 20px;">
             <label for="data">ENTER DATA TO SEND:</label><br>
             <!-- Preserve value if present -->
             <input type="text" id="data" name="data" placeholder="e.g. Hello" value="{{ data if data else '' }}"
                 required autocomplete="off">
         </div>
-        <button type="submit" class="btn btn-primary">GENERATE CHECKSUM ></button>
+        <button type="submit" name="action" value="calculate" class="btn btn-primary">GENERATE CHECKSUM ></button>
     </form>
 </div>
 
-<!-- STEPS 1-4: Visualization & STEP 5: Preview -->
-{% if step == 'preview' or step == 'sent' %}
-
-<!-- Step-by-Step Display Panel -->
+<!-- Step-by-Step Display Panel - Only show when PREVIEWING (Generated but not sent) -->
+{% if step == 'preview' %}
 <div class="card">
-    <h3>Checksum Generation Log</h3>
+    <h3>Calculation Steps Breakdown</h3>
 
     {% if steps_log %}
     {% for step_obj in steps_log %}
     <div class="step-container" style="margin-bottom: 20px; border-left: 5px solid #ccc; padding-left: 15px;">
         <h4 style="margin-top: 0; color: #555;">{{ step_obj.title }}</h4>
-        <div class="steps-log" style="max-height: 200px;">
+        <div class="steps-log">
             {% for line in step_obj.content %}
             <div class="log-line">{{ line }}</div>
             {% endfor %}
@@ -44,10 +46,10 @@
     <hr style="border: 0; border-top: 1px dashed #aaa; margin: 20px 0;">
     {% endif %}
     {% endfor %}
-    {% else %}
-    <p>No log available. (Packet may have been sent directly?)</p>
     {% endif %}
 </div>
+{% endif %}
+
 
 <!-- PIPE INSPECTION (Editable) - Only show if meant to be previewing/editing -->
 {% if step == 'preview' %}
@@ -55,7 +57,7 @@
     <h2 style="color: #444;">Packet Preview Before Transmission</h2>
     <p>Simulate Network Corruption by editing values below before sending.</p>
 
-    <form action="/send" method="post">
+    <form action="/sender" method="post">
         <!-- Hidden field to keep track of original data for UI consistency if needed, 
              but we rely on the inputs below for the actual send -->
 
@@ -72,13 +74,13 @@
         </div>
 
         <div style="margin-top: 20px; text-align: right;">
-            <button type="submit" class="btn btn-primary">SEND TO WIRE ></button>
+            <button type="submit" name="action" value="send" class="btn btn-primary">SEND TO WIRE ></button>
         </div>
     </form>
 </div>
 {% endif %}
 
-{% endif %}
+
 
 <!-- SENT CONFIRMATION -->
 {% if step == 'sent' %}

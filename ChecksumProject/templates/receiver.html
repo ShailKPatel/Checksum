@@ -2,6 +2,10 @@
 
 {% block title %}Receiver{% endblock %}
 
+{% block favicon %}
+<link rel="icon" href="/static/images/Luigi.png" type="image/png">
+{% endblock %}
+
 {% block content %}
 
 <!-- Title Block -->
@@ -36,8 +40,8 @@
     </div>
 
     <div style="margin-top: 20px; text-align: right;">
-        <form action="/reset" method="post" style="display:inline;">
-            <button type="submit" class="btn btn-secondary">CLEAR WIRE</button>
+        <form action="/receiver" method="post" style="display:inline;">
+            <button type="submit" name="action" value="clear" class="btn btn-secondary">CLEAR WIRE</button>
         </form>
         <a href="/receiver" class="btn btn-success">REFRESH</a>
     </div>
@@ -52,7 +56,7 @@
             {% for step_obj in verification_log %}
             <div class="step-container" style="margin-bottom: 20px; border-left: 5px solid #ccc; padding-left: 15px;">
                 <h4 style="margin-top: 0; color: #555;">{{ step_obj.title }}</h4>
-                <div class="steps-log" style="max-height: 200px;">
+                <div class="steps-log">
                     {% for line in step_obj.content %}
                     <div class="log-line">{{ line }}</div>
                     {% endfor %}

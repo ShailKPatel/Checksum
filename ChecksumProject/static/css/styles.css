@@ -37,6 +37,9 @@ body {
     margin-bottom: 30px;
     border-radius: 4px;
     position: relative;
+    height: auto;
+    overflow: visible;
+    /* Ensure content doesn't get clipped but background scales */
 }
 
 .card::after {
@@ -127,10 +130,15 @@ h1 {
     padding: 15px;
     border: 4px solid #444;
     border-radius: 4px;
-    max-height: 300px;
-    overflow-y: auto;
+    /* max-height: 300px;  Removed to allow full height */
+    /* overflow-y: auto;   Removed to allow full height */
+    overflow-y: visible;
     font-size: 0.8rem;
     line-height: 1.4;
+    white-space: pre-wrap;
+    /* Wrap long lines */
+    word-break: break-all;
+    /* Break long binary strings */
 }
 
 .steps-log div {
