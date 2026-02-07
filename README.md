@@ -16,12 +16,19 @@ This application simulates a sender-receiver network model to visualize:
 -   **Manual Corruption Simulation**: Edit the packet payload or checksum *before* it is sent to the "wire" to see how verification fails.
 -   **Dual-View Interface**: Separate Sender and Receiver pages to simulate distinct network endpoints.
 
+## Tech Stack
+
+-   **Backend**: Python 3.9+, FastAPI
+-   **Templating**: Jinja2
+-   **Frontend**: HTML5, CSS3 (Custom styling, no external frameworks like Bootstrap or Tailwind)
+-   **Fonts**: Google Fonts ("Press Start 2P")
+-   **Server**: Uvicorn
+
 ## How to Run
 
 1.  **Requirements**: Python 3.x, `fastapi`, `uvicorn`, `python-multipart`.
 2.  **Start**:
-    -   Double-click `run_app.bat` (Windows)
-    -   OR run: `python -m uvicorn main:app --reload`
+    -   run: `python -m uvicorn main:app --reload`
 3.  **Access**:
     -   Sender: `http://127.0.0.1:8000/sender`
     -   Receiver: `http://127.0.0.1:8000/receiver`
