@@ -1,9 +1,18 @@
-# Python
+# Python cache
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
+*.py[cod]
 
-# OS
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE / OS noise
+.vscode/
+.idea/
 .DS_Store
-Thumbs.db
+
+# Python build artifacts
+build/
+dist/
+*.egg-info/
